@@ -13,6 +13,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r prep, include=FALSE}
 cancer <- read.csv(url("http://statistics.csueastbay.edu/~jkerr/STAT65012/cancer.txt"), header=FALSE, col.names=c("x1","x2"))
 colnames(cancer) <- c("mortality", "pop")
+library(dplyr)
 
 ```
 ## Parts a, b, c, d, f
@@ -102,7 +103,7 @@ c(lower_lim, upper_lim) # 95% CI for T
 
 ## Part h.
 
-This will not be effective because such a ratio estimator does not increase our certainty about the mortality counts per county. 
+This is effective because the ratio estimates achieve comparable precision with a much smaller 
 
 ## Parts i, j, k 
 
@@ -160,11 +161,51 @@ c(lower,upper) # 95% CI for T_R
 ## Parts l, m, n
 
 ```{r strat}
+# l. four strata
+cancer$group <- ntile(cancer$pop, n=4)
+n1 <- mean(sample(cancer$mortality[cancer$group==1], size = 6))
+n2 <- mean(sample(cancer$mortality[cancer$group==2], size = 6))
+n3 <- mean(sample(cancer$mortality[cancer$group==3], size = 6))
+n4 <- mean(sample(cancer$mortality[cancer$group==4], size = 6))
+W <- 75/301 
+xbar_s <- W*(n1+n2+n3+n4)
+xbar_s #pop mean mortality estimate
+
+T_s <- 301*xbar_s
+T_s #pop total mortality estimate
 
 
+# m. 
+
+#sampling fraction for proportional allocation is simply 1/4th for each strata,
+#since each strata is equally sized. 
+
+#sampling fraction for optimal allocation:
+denom <- 
+  W*var(cancer$mortality[cancer$group==1]) + W*var(cancer$mortality[cancer$group==2]) +
+  W*var(cancer$mortality[cancer$group==3]) + W*var(cancer$mortality[cancer$group==4])
+
+n_1 <- var(cancer$mortality[cancer$group==1])/denom
+n_2 <- var(cancer$mortality[cancer$group==2])/denom
+n_3 <- var(cancer$mortality[cancer$group==3])/denom
+n_4 <- var(cancer$mortality[cancer$group==4])/denom
+
+c(W*n_1, W*n_2, W*n_3, W*n_4) #optimal allocation sampling fraction
+
+# Comparing variances.
+
+sig_bar <- W*(sqrt(n_1)) + W*(sqrt(n_2)) + W*(sqrt(n_3)) + W*(sqrt(n_4))
+
+VarXsp_by_VarXso <- 
+  1 + (W*((sqrt(n_1)-sig_bar)^2 + (sqrt(n_2)-sig_bar)^2 +
+           (sqrt(n_3)-sig_bar)^2 + (sqrt(n_4)-sig_bar)^2)
+       / ((W*(sqrt(n_1) + sqrt(n_2) + sqrt(n_3) + sqrt(n_4)))^2)
+       )
+
+VarXsp_by_VarXso
 
 ```
 
-
+Here we conclude that the variance of the mean proportional allocation is `r VarXsp_by_VarXso*100` percent of the variance under optimal allocation. Therefore, optimal allocation is clearly preferred. 
 
 
