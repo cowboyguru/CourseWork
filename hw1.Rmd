@@ -1,0 +1,170 @@
+---
+title: 'HW 1 #65'
+author: "Arjun Panda"
+date: "October 9, 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r prep, include=FALSE}
+cancer <- read.csv(url("http://statistics.csueastbay.edu/~jkerr/STAT65012/cancer.txt"), header=FALSE, col.names=c("x1","x2"))
+colnames(cancer) <- c("mortality", "pop")
+
+```
+## Parts a, b, c, d, f
+
+```{r summary}
+# a.
+hist(cancer$mortality, freq = T)
+# b. 
+mean(cancer$mortality)
+sum(cancer$mortality)
+
+(length(cancer$mortality)-1)/length(cancer$mortality)*var(cancer$mortality) #population var
+(length(cancer$mortality)-1)/length(cancer$mortality)*sd(cancer$mortality) #pop SD
+# Note: Since the variance function in R uses the n-1 in the denominator, I modify 
+#the result to reflect the actual population variance, not the estimator.
+
+# c. Simulate sampling distribution of x_bar with n=25
+
+xbars <- numeric(100)
+for(i in 1:100){
+  xbars[i] <- mean(sample(cancer$mortality, 25, replace = F))
+}
+hist(xbars, freq = T, xlab = "Cancer Mortality Sample Mean (X_bar, n=25)")
+
+# d. 
+x_bar <- mean(sample(cancer$mortality, 25, replace = F)) #n=25
+x_bar #mean cancer mortality estimator
+total <- x_bar*301 #total cancer mortality estimator
+total
+
+# e. 
+popvar <- (1-(1/301))*var(cancer$mortality)
+sqrt(popvar) # pop SD
+
+# f. 
+var_xbar <- (var(cancer$mortality)/25)*(1-(25/301))
+lower_lim <- x_bar - (1.96*sqrt(var_xbar))
+upper_lim <- x_bar + (1.96*sqrt(var_xbar))
+c(lower_lim, upper_lim) # 95% CI for X_bar
+
+#I am 95% confident that the average cancer mortality per county 
+#in the three states is contained within the values above
+
+var_total <- (301^2)*var_xbar
+lower_lim <- total - 1.96*sqrt(var_total)
+upper_lim <- total + 1.96*sqrt(var_total)
+c(lower_lim, upper_lim) # 95% CI for T
+
+#I am 95% confident that the total cancer for all counties 
+#in the three states is contained within the values above
+
+#Conclusion: Yes, the intervals cover the population values.
+
+```
+## Part g. (repeat for n=100)
+```{r again}
+
+# d. 
+x_bar <- mean(sample(cancer$mortality, 100, replace = F)) #n=100
+x_bar #mean cancer mortality estimator
+total <- x_bar*301 #total cancer mortality estimator
+total
+
+# e. 
+popvar <- (1-(1/301))*var(cancer$mortality)
+sqrt(popvar) # pop SD
+
+# f. 
+var_xbar <- (var(cancer$mortality)/100)*(1-(100/301))
+lower_lim <- x_bar - (1.96*sqrt(var_xbar))
+upper_lim <- x_bar + (1.96*sqrt(var_xbar))
+c(lower_lim, upper_lim) # 95% CI for X_bar
+
+#I am 95% confident that the average cancer mortality per county 
+#in the three states is contained within the values above
+
+var_total <- (301^2)*var_xbar
+lower_lim <- total - 1.96*sqrt(var_total)
+upper_lim <- total + 1.96*sqrt(var_total)
+c(lower_lim, upper_lim) # 95% CI for T
+
+#I am 95% confident that the total cancer mortality for all counties 
+#in the three states is contained within the values above
+
+#Conclusion: Yes, the intervals cover the population values.
+```
+
+## Part h.
+
+This will not be effective because such a ratio estimator does not increase our certainty about the mortality counts per county. 
+
+## Parts i, j, k 
+
+```{r parti}
+
+# i.
+cancer$prop <- cancer$mortality/cancer$pop
+ratios <- numeric(100)
+for(i in 1:100){
+  y_bar <- mean(sample(cancer$mortality, 25, replace = F))
+  x_bar <- mean(sample(cancer$pop, 25, replace = F))
+  ratios[i] <- y_bar/x_bar
+}
+hist(ratios, freq = T, xlab = "Sample Proportion Mean (p_hats, n=25)")
+
+#Compared to part c, the range of the distribution is more constrained.  
+
+# j.
+y_sample <- sample(cancer$mortality, 25, replace = F)
+x_sample <- sample(cancer$pop, 25, replace = F)
+y_bar <- mean(y_sample)
+x_bar <- mean(x_sample)
+R <- y_bar/x_bar #ratio estimator
+
+y_bar_R <- R*mean(cancer$pop)
+y_bar_R
+
+T_R <- R*sum(cancer$pop)
+T_R
+
+# These estimates are comparable to the values formulated
+# in part d. 
+
+# k. confidence intervals
+
+var_ybar_R <- (1/25)*(1-((24)/300))*(((R^2)*var(x_sample)) + var(y_sample) 
+                                     - 2*R*cov(x_sample,y_sample))
+lower <- y_bar_R - (1.96*sqrt(y_bar_R))
+upper <- y_bar_R + (1.96*sqrt(y_bar_R))
+c(lower,upper) # 95% CI for Ybar_R
+
+# I am 95% confident that the average number of cancer mortalities in each county
+# falls within the above values. 
+
+var_T_R <- (301^2)*var_ybar_R
+lower <- T_R - (1.96*sqrt(var_T_R))
+upper <- T_R + (1.96*sqrt(var_T_R))
+c(lower,upper) # 95% CI for T_R
+
+#I am 95% confident that the total cancer mortality for all counties 
+#in the three states is between the above values.
+
+```
+
+## Parts l, m, n
+
+```{r strat}
+
+
+
+```
+
+
+
+
