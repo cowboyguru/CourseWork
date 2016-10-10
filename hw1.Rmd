@@ -111,13 +111,13 @@ This is effective because the ratio estimates achieve comparable precision with 
 
 # i.
 cancer$prop <- cancer$mortality/cancer$pop
-ratios <- numeric(100)
+ybarRs <- numeric(100)
 for(i in 1:100){
   y_bar <- mean(sample(cancer$mortality, 25, replace = F))
   x_bar <- mean(sample(cancer$pop, 25, replace = F))
-  ratios[i] <- y_bar/x_bar
+  ybarRs[i] <- (y_bar/x_bar)*mean(cancer$pop)
 }
-hist(ratios, freq = T, xlab = "Sample Proportion Mean (p_hats, n=25)")
+hist(ybarRs, freq = T, xlab = "Pop. Means Estimated by Proportions (Y_bar_R, n=25)")
 
 #Compared to part c, the range of the distribution is more constrained.  
 
@@ -207,6 +207,10 @@ VarXsp_by_VarXso
 ```
 
 Here we conclude that the variance of the mean proportional allocation is `r VarXsp_by_VarXso*100` percent of the variance under optimal allocation. Therefore, optimal allocation is clearly preferred. 
+
+# Part n
+
+The estimates will get better, because as the number of stratifications approach N, Ybar_R will approach the true population mean. 
 
 
 
