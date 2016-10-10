@@ -158,7 +158,7 @@ c(lower,upper) # 95% CI for T_R
 
 ```
 
-## Parts l, m, n
+## Parts l, m
 
 ```{r strat}
 # l. four strata
@@ -207,5 +207,7 @@ VarXsp_by_VarXso
 ```
 
 Here we conclude that the variance of the mean proportional allocation is `r VarXsp_by_VarXso*100` percent of the variance under optimal allocation. Therefore, optimal allocation is clearly preferred. 
+
+
 
 
