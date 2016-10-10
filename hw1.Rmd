@@ -103,7 +103,7 @@ c(lower_lim, upper_lim) # 95% CI for T
 
 ## Part h.
 
-This is effective because the ratio estimates achieve comparable precision with a much smaller 
+This is effective because the ratio estimates achieve comparable precision with a much smaller sample.
 
 ## Parts i, j, k 
 
@@ -141,8 +141,8 @@ T_R
 
 var_ybar_R <- (1/25)*(1-((24)/300))*(((R^2)*var(x_sample)) + var(y_sample) 
                                      - 2*R*cov(x_sample,y_sample))
-lower <- y_bar_R - (1.96*sqrt(y_bar_R))
-upper <- y_bar_R + (1.96*sqrt(y_bar_R))
+lower <- y_bar_R - (1.96*sqrt(var_ybar_R))
+upper <- y_bar_R + (1.96*sqrt(var_ybar_R))
 c(lower,upper) # 95% CI for Ybar_R
 
 # I am 95% confident that the average number of cancer mortalities in each county
