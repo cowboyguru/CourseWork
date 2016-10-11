@@ -2,7 +2,7 @@
 title: 'HW 1 #65'
 author: "Arjun Panda"
 date: "October 9, 2016"
-output: html_document
+output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
