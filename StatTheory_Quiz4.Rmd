@@ -10,7 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Intro
 
-This was a take-home quiz in our Statistical Theory course, demonstrating maximum likelihood estimation, bootstrapping, and Baysian parameter estimation in four short questions. I haven't been able to find the original problem set, but the questions can be more or less inferred from their solutions below. 
+This was a take-home quiz in our Statistical Theory course, demonstrating maximum likelihood estimation, bootstrapping, and Baysian parameter estimation in three short questions. I haven't been able to find the original problem set, but the questions can be more or less inferred from their solutions below. 
 
 ### Question 1
 #### a.
