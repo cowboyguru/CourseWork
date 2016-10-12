@@ -1,0 +1,134 @@
+---
+title: "Intro to Parameter Estimation"
+author: "Arjun Panda, Erin Boon, David Noonan"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Intro
+
+This was a take-home quiz in our Statistical Theory course, demonstrating maximum likelihood estimation, bootstrapping, and Baysian parameter estimation in four short questions. I haven't been able to find the original problem set, but the questions can be more or less inferred from their solutions below. 
+
+### Question 1
+#### a.
+Tau = (k*r)/x = 7887.64   The estimation for tau, the population of this town, is roughly 7,888 people.
+#### b.
+MLE Simulation in R
+
+```{r MLEsim}
+tau <- 7500:8500
+r <- 3900
+k <- 900
+x <- 445
+like <- dhyper(x,r,tau-r,k)
+likelihood <- data.frame(tau, like, row.names = NULL)
+
+
+library("ggplot2", lib.loc="~/R/win-library/3.2")
+
+ggplot(likelihood, aes(x = likelihood$tau, y= likelihood$like)) + 
+  geom_line(color = "purple", size = 1) + 
+  labs(x = "Population Size", y = "Likelihood", title = "Likelihood Function for x=445") 
+```
+The plot of the maximum likelihood function for tau shows that the estimation of the population size (tau) is maximized at roughly 7,888 people.
+
+### Question 2
+We begin by evaluating a 95 percent confidence interval for the mean change in blood pressure using both parametric and non-parametric (bootstrap) methods. 
+
+#### a.
+
+```{r bootstrap}
+reduction <- c(8.9,13.1,12.8,9.4,5.4,-4.2,-2.6,7.0,9.8,-1.9,-1.7,8.4)
+n <- length(reduction)
+rm <- mean(reduction)
+rsd <- sd(reduction)
+error <- qt(0.975, df = n-1)*rsd/sqrt(n)
+left <- rm - error
+right <- rm + error
+ci <- c(left, right)
+print(ci)
+
+qqnorm(reduction)
+qqline(reduction)
+shapiro.test(reduction)
+```
+
+Our results indicate that at an alpha level of 0.05 we can assume normality, but barely. We continue to the non-parametric bootstrapping method of constructing a 95 percent confidence interval for the mean reduction in blood pressure. 
+```{r bsci}
+n <- length(reduction)
+b <- 10000
+bss <- sample(reduction, b*n, replace=T)
+bssMatrix <- matrix(bss,nrow=b)
+bsm <- rowMeans(bssMatrix)
+hist(bsm, col="light blue", main="Histogram of Bootstrap Means", xlab="mean")
+bsci <- quantile(bsm,c(0.025,0.975))
+print(bsci)
+```
+
+#### b. 
+First, the parametric one-sided t-test:
+```{r 2b}
+reduction <- c(8.9,13.1,12.8,9.4,5.4,-4.2,-2.6,7.0,9.8,-1.9,-1.7,8.4)
+t.test(reduction, mu=0, alternative = "less")
+```
+Now, using our bootstrap samples to establish non-parametric t* values:
+```{r 2c}
+rsd=sd(reduction)
+bssd=apply(bssMatrix,1,sd)
+bst=(bsm-rm)/(bssd/sqrt(n))
+
+tActual = (rm-0)/(rsd/sqrt(n))
+pValue = mean(bst < tActual)
+print(pValue)
+```
+
+#### c.
+
+With the data normally distributed, we can conduct a t test using the sample standard deviation, but because there are only 12 observations, the t-test is not ideal. The bootstrap method is able to produce a narrower confidence interval. The t test produces a 95 percent confidence interval of (1.380022, 9.353311); using the bootstrap method produces a 95 percent confidence interval of  (1.824792, 8.658333). 
+
+By both methods, we find that there is insufficient evidence to reject the null hypothesis that the mean change in blood pressure is greater than or equal to zero, i.e. we can not conclude that the treatment lowers blood pressure. The t test produces a p-value of 0.9935; the bootstrap method produces a p-value of 0.9855. Note also that both methods produce Confidence Intervals that are entirely positive. It is worth noting that the bootstrap confidence interval is narrower, which tells us that it is a better method of interval estimation. 
+
+### Question 3
+
+For this question we use Baysian estimation methods to find the probablity of getting a head in a coin toss (modeled by a Bernoulli trial). From the provided prior data set, we estimated the likelihood distribution. We decided to use a conjugate prior beta distribution for ptheta with parameters a = 3 and b = 10, which results in a convenient posterior probability modeled by the beta distribution as well. Plotted below are the prior, likelihood, and posterior probabilities against theta values.
+
+```{r bayes}
+binwidth <- 0.005
+theta <- seq(from = binwidth/2, to = 1-(binwidth/2), by = binwidth)
+a = 3
+b = 10
+
+ptheta <- dbeta(theta, a, b)
+coin_toss <- c(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+               1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+y <- sum(coin_toss == 1)
+N <- length(coin_toss)
+
+pdatagiventheta <- theta^y*(1-theta)^(N-y)
+pthetagivendata <- dbeta(theta, a+y, N+b-y)
+
+layout(matrix(c(1,2,3), nrow = 3, ncol = 1, byrow = FALSE) )
+plot(theta, ptheta, type="l", lwd=3, main="Prior, beta(3,10)", col="darkred" )
+plot(theta, pdatagiventheta, type="l", lwd=3, main="Likelihood", col="darkred")
+plot(theta, pthetagivendata, type="l", lwd=3, main="Posterior", col="darkred")
+```
+
+The posterior distribution is the probability of theta given data. That is, the probability of getting heads considering the prior probabilities of theta (ptheta) as well as the likelihood given our data (pdatagiventheta). The most probable estimator for theta can be evaluated from this. 
+
+```{r bayes2}
+theta[which(pthetagivendata == max(pthetagivendata))]
+```
+
+Furthermore, we can evaluate the 95 percent confidence interval for the probability of getting a head from its posterior distribution.
+
+```{r bayes 3}
+cdfposterior <- pbeta(theta, a+y, N+b-y)
+plot(theta, cdfposterior)
+theta[which.min(abs(cdfposterior - 0.025)) ]
+theta[which.min(abs(cdfposterior - 0.975))]
+```
+
+Here you see the cdf of the posterior function, which is plotted against theta. Then we found the .025 and .975 quantiles from this data. In conclusion, the posterior distribution tells us that the most likely value for theta is 0.4925, with a 95 confidence interval from 0.3675 to 0.6175. We can clearly see that the information from the prior distribution was used to adjust the liklihood distribution to create the "better informed" posterior distribution, which shifts lower as an adjustment. 
