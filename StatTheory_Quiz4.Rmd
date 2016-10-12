@@ -33,6 +33,7 @@ ggplot(likelihood, aes(x = likelihood$tau, y= likelihood$like)) +
   geom_line(color = "purple", size = 1) + 
   labs(x = "Population Size", y = "Likelihood", title = "Likelihood Function for x=445") 
 ```
+
 The plot of the maximum likelihood function for tau shows that the estimation of the population size (tau) is maximized at roughly 7,888 people.
 
 ### Question 2
